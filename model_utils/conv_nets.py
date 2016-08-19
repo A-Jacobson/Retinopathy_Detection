@@ -3,7 +3,7 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Dense, Activation, Flatten, BatchNormalization, Dropout
 
 
-# first model
+# first model 13 layer convnet
 def conv1(input_shape=(3, 512, 512), nb_classes=5):
     model = Sequential()
     model.add(Convolution2D(16, 3, 3, border_mode='same', input_shape=input_shape))
