@@ -1,24 +1,24 @@
-from models.resnet50 import ResNet50
-from keras.preprocessing import image
-from models.imagenet_utils import preprocess_input, decode_predictions
-from keras.utils import np_utils
-import numpy as np
+
 import os
+import numpy as np
+from keras.utils import np_utils
+from keras.models import Sequential
+from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Dense, Activation, Flatten, BatchNormalization, Dropout
+from keras.callbacks import ModelCheckpoint, EarlyStopping
+from model_utils.conv_nets import conv1
 
-img_path = os.path.join('data', 'samples', '10_left.jpeg')
-img = image.load_img(img_path, target_size=(224, 224))
+img_rows, img_cols = 512, 512
+img_channels = 3
+nb_classes = 5
 
-x = image.img_to_array(img)
-print x.shape
-x = np.expand_dims(x, axis=0) # because the convnet expects a batch of images
-print x.shape
-y = np.array([0])
-y = np_utils.to_categorical(y, 5)
+X_sample = np.load(os.path.join('data', 'train', 'X_sample.npy'))
+y_sample = np.load(os.path.join('data', 'train', 'y_sample.npy'))
+y_sample = np_utils.to_categorical(y_sample, nb_classes)
 
-y = np.expand_dims(y, axis=0) # because the convnet expects a batch of images
-y = np.expand_dims(y, axis=0) # because the convnet expects a batch of images
-print y.shape
+model = conv1()
 
-model = ResNet50(weights=None, include_top=False)
-model.compile(loss='categorical_crossentropy', optimizer='adam')
-model.fit(x, y)
+earlystop = EarlyStopping(monitor='loss', patience=2, verbose=1, mode='auto')
+checkpointer = ModelCheckpoint(filepath=os.path.join("models", "tmp", "weights.hdf5"), verbose=1, save_best_only=False, monitor='loss')
+history = model.fit(X, y, batch_size=5, nb_epoch=20, verbose=1, callbacks=[checkpointer, earlystop])
+print model.predict(X_sample[:1])
