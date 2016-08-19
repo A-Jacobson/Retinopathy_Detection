@@ -6,7 +6,7 @@ from keras.models import Sequential
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Dense, Activation, Flatten, BatchNormalization, Dropout
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from model_utils.conv_nets import conv1
+from models.conv_nets import conv1
 
 # load data
 X_sample = np.load(os.path.join('data', 'train', 'X_sample.npy'))
@@ -19,7 +19,7 @@ y_sample = np_utils.to_categorical(y_sample, 5)
 model = conv1()
 
 earlystop = EarlyStopping(monitor='loss', patience=10, verbose=1, mode='auto')
-checkpointer = ModelCheckpoint(filepath=os.path.join("models", "tmp", "weights.hdf5"), verbose=1, save_best_only=False, monitor='loss')
+checkpointer = ModelCheckpoint(filepath=os.path.join("models", "saved_models", "conv1_1.hdf5"), verbose=1, save_best_only=False, monitor='loss')
 history = model.fit(X_sample[:1], y_sample[:1], batch_size=5, nb_epoch=20, verbose=1, callbacks=[checkpointer, earlystop])
 print model.predict_classes(X_sample[:1])
 print np.argmax(y_sample[0])
