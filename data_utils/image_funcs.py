@@ -60,11 +60,19 @@ def smart_resize(im, size=(512, 512)):
     im = cv2.resize(im, size)
     return im
 
+def histogram_equalization(im):
+    img_yuv = cv2.cvtColor(test, cv2.COLOR_BGR2YUV)
+    img_yuv[:,:,0] = cv2.equalizeHist(img[:,:,0])
+    return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
+
 def preprocess_img(im, size=(512, 512), threshold=50):
     im = cv2.imread(im)
     im = crop(im, threshold)
     im = smart_resize(im, size)
     return im
+
+def to_training_shape(im):
+    return im.reshape(3, 512, 512)
 
 
 
