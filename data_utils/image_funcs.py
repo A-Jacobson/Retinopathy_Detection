@@ -30,12 +30,41 @@ def smart_crop(im, threshold=30):
     threshold = min pixel value for binary-otsu thresholding
 
     """
-    im = cv2.imread(im)
     imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(imgray, threshold, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     contours = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     x, y, w, h = cv2.boundingRect(contours[0])
     return im[y:y+h,x:x+w]
+
+def smart_resize(im, size=(512, 512)):
+    """
+    resize an image while retaining aspect ratio, pad with black background
+    im = image as np array
+    """
+    h, w, _ = im.shape
+
+    if w > h:
+        difference = w - h
+        top = int((difference/2 + (difference%2)))
+        bottom = int(np.ceil(difference/2.))
+        left = 0
+        right = 0
+        im = cv2.copyMakeBorder(im, top, bottom, left, right,cv2.BORDER_CONSTANT)
+    if h > w:
+        difference = h - w
+        top = 0
+        bottom = 0
+        left = int((difference/2 + (difference%2)))
+        right = int(np.ceil(difference/2.))
+        im = cv2.copyMakeBorder(im, top, bottom, left, right,cv2.BORDER_CONSTANT)
+    im = cv2.resize(im, size)
+    return im
+
+def preprocess_img(im, size=(512, 512), threshold=50):
+    im = cv2.imread(im)
+    im = crop(im, threshold)
+    im = smart_resize(im, size)
+    return im
 
 
 
