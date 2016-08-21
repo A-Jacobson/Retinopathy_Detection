@@ -21,3 +21,7 @@ if config['arrange_directories'] == True:
     train, test, val = train_test_val_split(y, random_state=config['random_state'], split=config['split'])
     arrange_directories(test, 'test')
     arrange_directories(val, 'validation')
+
+y = pd.read_csv(config['y_path'])
+train, test, val = train_test_val_split(y, random_state=config['random_state'], split=config['split'])
+print len(train), len(test), len(val)
