@@ -7,6 +7,9 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Dense, Activation, Flatten, BatchNormalization, Dropout
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from models.conv_nets import conv1
+from data_utils.image_funcs import ImageGenerator
+
+X_train_path =
 
 # load data
 X_sample = np.load(os.path.join('data', 'train', 'X_sample.npy'))
