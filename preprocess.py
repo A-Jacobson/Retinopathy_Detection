@@ -1,16 +1,27 @@
-from data_utils import image_funcs
+from data_utils.image_funcs import ImagePreProcessor, ImageGenerator
 import os
+from data_utils.split import train_test_val_split, arrange_directories
+import pandas as pd
+from config import preprocessing_config
 
-# resize train to 512
-input_dir_train = os.path.abspath(os.path.join("E:", "DR_Data", "Train"))
-output_dir_train = os.path.abspath(os.path.join("E:", "DR_Data", "train_512"))
-image_funcs.resize_directory(input_dir_train, output_dir_train)
+config = preprocessing_config
+pre = ImagePreProcessor()
 
-# resize test
-input_dir_test = os.path.abspath(os.path.join("E:", "DR_Data", "Test"))
-output_dir_test = os.path.abspath(os.path.join("E:", "DR_Data", "test_512"))
-image_funcs.resize_directory(input_dir_test, output_dir_test)
+# resize preprocess train
+if config['process_train'] == True:
+    pre.preprocess_directory(config['input_dir_train'], config['output_dir_train'])
 
-# make (N, channels, width, height) matrices
-image_funcs.matrix_from_dir(output_dir_train, name='X_train')
-image_funcs.matrix_from_dir(output_dir_train, name='X_test')
+# preprocess test
+if config['process_test'] == True:
+    pre.preprocess_directory(config['input_dir_test'], config['output_dir_test'])
+
+#split training directories for keras flow from directory
+if config['arrange_directories'] == True:
+    y = pd.read_csv(config['y_path'])
+    train, test, val = train_test_val_split(y, random_state=config['random_state'], split=config['split'])
+    arrange_directories(test, 'test')
+    arrange_directories(val, 'validation')
+
+y = pd.read_csv(config['y_path'])
+train, test, val = train_test_val_split(y, random_state=config['random_state'], split=config['split'])
+print len(train), len(test), len(val)
