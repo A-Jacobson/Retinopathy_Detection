@@ -1,6 +1,7 @@
 import pandas as pd
 import shutil
 import os
+import fnmatch
 
 def train_test_val_split(y, split=0.8, random_state=1337):
     y_new = y.sample(frac=split,random_state=random_state)
@@ -20,3 +21,6 @@ def arrange_directories(df, split, labels=[0, 1, 2, 3, 4], src=os.path.join("E:"
         names = find_class(df, label)
         for name in names:
             move_file(name, split, label, src, dst, ending)
+
+def get_labels(directory):
+    return {i: image.strip('.jpeg') for i, image in enumerate(os.listdir(directory))}

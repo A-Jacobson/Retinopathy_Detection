@@ -1,6 +1,6 @@
-
 import os
 import numpy as np
+import pandas as pd
 from keras.utils import np_utils
 from keras.models import Sequential, load_model
 from keras.layers import Convolution2D, MaxPooling2D
@@ -14,20 +14,21 @@ import matplotlib.pyplot as plt
 
 size = preprocessing_config['size']
 config = training_config
+
 nb_train_samples = 22481
 nb_validation_samples = 5620
 
 
 #load model
 if config['continue_training'] == True:
-    model = load_model(os.path.join('models', 'saved_models', 'conv1_1.hdf5'))
+    model = load_model(os.path.join('models', 'saved_models', config['model_name']+'.hdf5'))
 
 else:
     model = resnet_v1()
 
 
-earlystop = EarlyStopping(monitor='val_loss', patience=10, verbose=1, mode='auto')
-checkpointer = ModelCheckpoint(filepath=os.path.join('models', 'saved_models', 'resnetv1_1.hdf5'), verbose=1, save_best_only=False, monitor='val_loss')
+earlystop = EarlyStopping(monitor='val_loss', patience=4, verbose=1, mode='auto')
+checkpointer = ModelCheckpoint(filepath=os.path.join('models', 'saved_models', config['model_name']+'.hdf5'), verbose=1, save_best_only=False, monitor='val_loss')
 
 if config['prototype_model'] == True:
     # checks if model overfits one sample
@@ -41,11 +42,17 @@ if config['prototype_model'] == True:
             nb_epoch=config['nb_epoch'],
             verbose=1,
             callbacks=[checkpointer, earlystop],
-            class_weight=config['class_weights'])
+            class_weight=config['class_weight'])
 else:
     # this is the augmentation configuration we will use for training
-    train_datagen = ImageDataGenerator(featurewise_center=True)
-    test_datagen = ImageDataGenerator(featurewise_center=True)
+    train_datagen = ImageDataGenerator(samplewise_center=True,
+                                        rotation_range=20,
+                                        width_shift_range=0.2,
+                                        height_shift_range=0.2,
+                                        zoom_range=0.2,
+                                        horizontal_flip=True)
+
+    test_datagen = ImageDataGenerator(samplewise_center=True)
 
     train_generator = train_datagen.flow_from_directory(
             config['train_data_dir'],
@@ -66,11 +73,18 @@ else:
             validation_data=validation_generator,
             nb_val_samples=nb_validation_samples,
             callbacks=[checkpointer, earlystop],
-            class_weight=config['class_weights'],
-            nb_worker=-1)
+            class_weight=config['class_weight'],
+            nb_worker=4)
 
 # list all data in history
-print(history.history.keys())
+
+if config['continue_training'] == True:
+    with open(os.path.join('training_history', config['model_name']+'.csv'), 'a') as f:
+        pd.DataFrame(history.history).to_csv(f, header=False)
+
+else:
+    pd.DataFrame(history.history).to_csv(os.path.join('training_history', config['model_name']+'.csv'))
+
 # summarize history for accuracy
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
@@ -79,7 +93,7 @@ plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
-# summarize history for loss
+
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
