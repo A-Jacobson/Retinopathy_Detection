@@ -1,6 +1,6 @@
 from data_utils.image_funcs import ImagePreProcessor, ImageGenerator
 import os
-from data_utils.split import train_test_val_split, arrange_directories
+from data_utils.data_funcs import train_test_val_split, arrange_directories
 import pandas as pd
 from config import preprocessing_config
 

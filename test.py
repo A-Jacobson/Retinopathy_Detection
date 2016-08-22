@@ -9,8 +9,7 @@ import glob
 
 config = training_config
 
-test_datagen = ImageDataGenerator(
-validation_data_dir = config['validation_data_dir'])
+test_datagen = ImageDataGenerator(validation_data_dir = config['validation_data_dir'])
 
 validation_generator = test_datagen.flow_from_directory(
         validation_data_dir,

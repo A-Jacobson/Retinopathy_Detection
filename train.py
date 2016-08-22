@@ -1,4 +1,3 @@
-
 import os
 import numpy as np
 import pandas as pd
@@ -15,6 +14,7 @@ import matplotlib.pyplot as plt
 
 size = preprocessing_config['size']
 config = training_config
+
 nb_train_samples = 22481
 nb_validation_samples = 5620
 
@@ -27,7 +27,7 @@ else:
     model = resnet_v1()
 
 
-earlystop = EarlyStopping(monitor='val_loss', patience=10, verbose=1, mode='auto')
+earlystop = EarlyStopping(monitor='val_loss', patience=4, verbose=1, mode='auto')
 checkpointer = ModelCheckpoint(filepath=os.path.join('models', 'saved_models', config['model_name']+'.hdf5'), verbose=1, save_best_only=False, monitor='val_loss')
 
 if config['prototype_model'] == True:
@@ -50,7 +50,7 @@ else:
                                         width_shift_range=0.2,
                                         height_shift_range=0.2,
                                         zoom_range=0.2,
-                                        horizontal_flip=True))
+                                        horizontal_flip=True)
 
     test_datagen = ImageDataGenerator(samplewise_center=True)
 
@@ -77,7 +77,6 @@ else:
             nb_worker=4)
 
 # list all data in history
-print(history.history.keys())
 
 if config['continue_training'] == True:
     with open(os.path.join('training_history', config['model_name']+'.csv'), 'a') as f:
