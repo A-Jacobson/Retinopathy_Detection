@@ -15,6 +15,7 @@ preprocessing_config = {
 }
 
 training_config = {
+            'model_name': 'resnetv1_1',
             'prototype_model': False,
             'continue_training': False,
             'batch_size': 3,
@@ -22,5 +23,7 @@ training_config = {
             'train_data_dir': os.path.abspath(os.path.join('E:', 'DR_Data', 'train')),
             'validation_data_dir': os.path.abspath(os.path.join('E:', 'DR_Data', 'validation')),
             'test_data_dir': os.path.abspath(os.path.join('E:', 'DR_Data', 'train')),
-            'class_weights': [ 0.27218907, 2.8756447, 1.32751323, 8.04719359, 9.92259887] # based on http://gking.harvard.edu/files/0s.pdf (prior correction)
+            'class_weight': {0:0.27218907, 1:2.8756447, 2:1.32751323, 3:8.04719359, 4:9.92259887} # based on http://gking.harvard.edu/files/0s.pdf (prior correction)
 }
+
+predict_config =
