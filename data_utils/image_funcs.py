@@ -8,34 +8,34 @@ from scipy import misc
 import itertools
 
 
-class ImageGenerator:
-    """
-    warning, current implimentation does not work
-    """
-    def __init__(self, X_path=os.path.join("E:", "DR_Data", "Train_512"), y_path=os.path.join('data', 'trainLabels.csv'), shape=(3, 512, 512), ending=".jpeg"):
-        self.X_path = X_path
-        self.y_path = y_path
-        self.shape = shape
-        self.ending = ending
-
-    def reshape(self, im, shape):
-        im = misc.imread(im)
-        return np.reshape(im, shape)
-
-    def x_generator(self, directory):
-        for image in glob.glob(os.path.join(directory, '*'+self.ending)):
-            yield self.reshape(image, self.shape)
-
-    def y(self, directory):
-        y = pd.read_csv(directory)
-        return y.level.values
-
-    def get_batch(self, batch_size=5):
-        x_gen = self.x_generator(self.X_path)
-        y = self.y(self.y_path)
-        X_batch = np.array(list(itertools.islice(x_gen, 0, batch_size, 1)))
-        y_batch = np.array(list(itertools.islice(y, 0, batch_size, 1)))
-        return X_batch, y_batch
+# class ImageGenerator:
+#     """
+#     warning, current implimentation does not work
+#     """
+#     def __init__(self, X_path=os.path.join("E:", "DR_Data", "Train_512"), y_path=os.path.join('data', 'trainLabels.csv'), shape=(3, 512, 512), ending=".jpeg"):
+#         self.X_path = X_path
+#         self.y_path = y_path
+#         self.shape = shape
+#         self.ending = ending
+#
+#     def reshape(self, im, shape):
+#         im = misc.imread(im)
+#         return np.reshape(im, shape)
+#
+#     def x_generator(self, directory):
+#         for image in glob.glob(os.path.join(directory, '*'+self.ending)):
+#             yield self.reshape(image, self.shape)
+#
+#     def y(self, directory):
+#         y = pd.read_csv(directory)
+#         return y.level.values
+#
+#     def get_batch(self, batch_size=5):
+#         x_gen = self.x_generator(self.X_path)
+#         y = self.y(self.y_path)
+#         X_batch = np.array(list(itertools.islice(x_gen, 0, batch_size, 1)))
+#         y_batch = np.array(list(itertools.islice(y, 0, batch_size, 1)))
+#         return X_batch, y_batch
 
 
 class ImagePreProcessor:
