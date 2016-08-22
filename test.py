@@ -16,7 +16,8 @@ validation_generator = test_datagen.flow_from_directory(
         validation_data_dir,
         target_size=(512, 512),
         batch_size=5,
-        class_mode=None)
+        class_mode=None,
+        shuffle=False)
 
 X_sample = np.load(os.path.join('data', 'X_sample.npy'))
 y_sample = np.load(os.path.join('data', 'y_sample.npy'))
