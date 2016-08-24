@@ -3,16 +3,15 @@
 # https://github.com/fchollet/keras/blob/master/examples/resnet_50.py
 # https://github.com/KaimingHe
 
-# based on http://arxiv.org/abs/1512.03385
+# based on:
+# http://arxiv.org/abs/1512.03385
 from keras.layers import merge
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D
 from keras.layers.core import Dense, Activation, Flatten
 from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.layers import Input
-from keras.preprocessing.image import load_img, img_to_array
-import keras.backend as K
-import numpy as np
+
 
 # The names of layers in resnet50 are generated with the following format
 # [type][stage][block]_branch[branch][layer]
@@ -32,29 +31,23 @@ def identity_block(input_tensor, kernel_size, filters, stage, block):
         stage: integer, current stage label, used for generating layer names
         block: 'a','b'..., current block label, used for generating layer names
     '''
-    dim_ordering = K.image_dim_ordering()
     nb_filter1, nb_filter2, nb_filter3 = filters
-    if dim_ordering == 'tf':
-        bn_axis = 3
-    else:
-        bn_axis = 1
+
     conv_name_base = 'res' + str(stage) + block + '_branch'
     bn_name_base = 'bn' + str(stage) + block + '_branch'
 
-    out = Convolution2D(nb_filter1, 1, 1, dim_ordering=dim_ordering, name=conv_name_base + '2a')(input_tensor)
-    out = BatchNormalization(axis=bn_axis, name=bn_name_base + '2a')(out)
+    out = BatchNormalization(axis=1, name=bn_name_base + '2a')(input_tensor)
     out = Activation('relu')(out)
+    out = Convolution2D(nb_filter1, 1, 1, init='he_normal', name=conv_name_base + '2a')(out)
 
-    out = Convolution2D(nb_filter2, kernel_size, kernel_size, border_mode='same',
-                        dim_ordering=dim_ordering, name=conv_name_base + '2b')(out)
-    out = BatchNormalization(axis=bn_axis, name=bn_name_base + '2b')(out)
+    out = BatchNormalization(axis=1, name=bn_name_base + '2b')(out)
     out = Activation('relu')(out)
+    out = Convolution2D(nb_filter2, kernel_size, kernel_size, border_mode='same', init='he_normal', name=conv_name_base + '2b')(out)
 
-    out = Convolution2D(nb_filter3, 1, 1, dim_ordering=dim_ordering, name=conv_name_base + '2c')(out)
-    out = BatchNormalization(axis=bn_axis, name=bn_name_base + '2c')(out)
+    out = BatchNormalization(axis=1, name=bn_name_base + '2c')(out)
+    out = Convolution2D(nb_filter3, 1, 1, init='he_normal', name=conv_name_base + '2c')(out)
 
     out = merge([out, input_tensor], mode='sum') # always merge input with output of the block to retain information before transformations?
-    out = Activation('relu')(out)
     return out
 
 
@@ -67,35 +60,25 @@ def conv_block(input_tensor, kernel_size, filters, stage, block, strides=(2, 2))
         stage: integer, current stage label, used for generating layer names
         block: 'a','b'..., current block label, used for generating layer names
     Note that from stage 3, the first conv layer at main path is with subsample=(2,2)
-    And the shortcut should has subsample=(2,2) as well
+    And the shortcut should have subsample=(2,2) as well
     '''
     nb_filter1, nb_filter2, nb_filter3 = filters
-    dim_ordering = K.image_dim_ordering()
-    if dim_ordering == 'tf':
-        bn_axis = 3
-    else:
-        bn_axis = 1
     conv_name_base = 'res' + str(stage) + block + '_branch'
     bn_name_base = 'bn' + str(stage) + block + '_branch'
 
-    out = Convolution2D(nb_filter1, 1, 1, subsample=strides,
-                        dim_ordering=dim_ordering, name=conv_name_base + '2a')(input_tensor)
-    out = BatchNormalization(axis=bn_axis, name=bn_name_base + '2a')(out)
+    out = BatchNormalization(axis=1, name=bn_name_base + '2a')(input_tensor)
     out = Activation('relu')(out)
+    out = Convolution2D(nb_filter1, 1, 1, init='he_normal', subsample=strides, name=conv_name_base + '2a')(out)
 
-    out = Convolution2D(nb_filter2, kernel_size, kernel_size, border_mode='same',
-                        dim_ordering=dim_ordering, name=conv_name_base + '2b')(out)
-    out = BatchNormalization(axis=bn_axis, name=bn_name_base + '2b')(out)
+    out = BatchNormalization(axis=1, name=bn_name_base + '2b')(out)
     out = Activation('relu')(out)
+    out = Convolution2D(nb_filter2, kernel_size, kernel_size, init='he_normal', border_mode='same', name=conv_name_base + '2b')(out)
 
-    out = Convolution2D(nb_filter3, 1, 1, dim_ordering=dim_ordering, name=conv_name_base + '2c')(out)
-    out = BatchNormalization(axis=bn_axis, name=bn_name_base + '2c')(out)
+    out = BatchNormalization(axis=1, name=bn_name_base + '2c')(out)
+    out = Convolution2D(nb_filter3, 1, 1, init='he_normal', name=conv_name_base + '2c')(out)
 
-    # shortcut layer, does one conv instead of 3
-    shortcut = Convolution2D(nb_filter3, 1, 1, subsample=strides,
-                             dim_ordering=dim_ordering, name=conv_name_base + '1')(input_tensor)
-    shortcut = BatchNormalization(axis=bn_axis, name=bn_name_base + '1')(shortcut)
+    shortcut = BatchNormalization(axis=1, name=bn_name_base + '1')(input_tensor)
+    shortcut = Convolution2D(nb_filter3, 1, 1, subsample=strides, init='he_normal', name=conv_name_base + '1')(shortcut)
 
     out = merge([out, shortcut], mode='sum')
-    out = Activation('relu')(out)
     return out
