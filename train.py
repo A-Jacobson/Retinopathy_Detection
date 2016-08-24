@@ -55,14 +55,21 @@ if config['prototype_model'] == True:
             callbacks=[checkpointer],
             class_weight=config['class_weight'])
 else:
+
+    gen_sample_X = np.load(os.path.join('data', 'gen_sample_X.npy'))
+
     train_datagen = ImageDataGenerator(
                 samplewise_center=True,
                 zoom_range=0.1,
-                horizontal_flip=True
+                horizontal_flip=True,
+                vertical_flip=True,
+                rotation_range=10,
+                rescale=1/255.
                 )
 
     test_datagen = ImageDataGenerator(
-                samplewise_center=True
+                samplewise_center=True,
+                rescale=1/255.
                 )
 
     train_generator = train_datagen.flow_from_directory(

@@ -30,7 +30,7 @@ print y_sample
 
 
 # gen
- pd.DataFrame(np.argmax(model.predict_generator(validation_generator, 10), axis=1)).to_csv('preds.csv')
+pd.DataFrame(np.argmax(model.predict_generator(validation_generator, 10), axis=1)).to_csv('preds.csv')
 
 # get image id's
 

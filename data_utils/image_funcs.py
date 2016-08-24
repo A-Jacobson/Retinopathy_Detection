@@ -8,34 +8,34 @@ from scipy import misc
 import itertools
 
 
-# class ImageGenerator:
-#     """
-#     warning, current implimentation does not work
-#     """
-#     def __init__(self, X_path=os.path.join("E:", "DR_Data", "Train_512"), y_path=os.path.join('data', 'trainLabels.csv'), shape=(3, 512, 512), ending=".jpeg"):
-#         self.X_path = X_path
-#         self.y_path = y_path
-#         self.shape = shape
-#         self.ending = ending
-#
-#     def reshape(self, im, shape):
-#         im = misc.imread(im)
-#         return np.reshape(im, shape)
-#
-#     def x_generator(self, directory):
-#         for image in glob.glob(os.path.join(directory, '*'+self.ending)):
-#             yield self.reshape(image, self.shape)
-#
-#     def y(self, directory):
-#         y = pd.read_csv(directory)
-#         return y.level.values
-#
-#     def get_batch(self, batch_size=5):
-#         x_gen = self.x_generator(self.X_path)
-#         y = self.y(self.y_path)
-#         X_batch = np.array(list(itertools.islice(x_gen, 0, batch_size, 1)))
-#         y_batch = np.array(list(itertools.islice(y, 0, batch_size, 1)))
-#         return X_batch, y_batch
+
+def get_channel_means(images):
+    sum_r = 0
+    sum_g = 0
+    sum_b = 0
+    n = float(len(images))
+    for im in images:
+        im = misc.imread(im)
+        sum_r += np.mean(im[:, :, 0])
+        sum_g += np.mean(im[:, :, 1])
+        sum_b += np.mean(im[:, :, 2])
+    mean_r = sum_r / n
+    mean_g = sum_g / n
+    mean_b = sum_b / n
+    return np.array([mean_r, mean_g, mean_b], dtype='uint8')
+
+
+def get_mean(images):
+    total = 0
+    n = float(len(images))
+    for im in images:
+        im = misc.imread(im)
+        total += np.mean(im)
+    mean = total / n
+    return np.array(mean, dtype='uint8')
+
+def get_sample_matrix(images):
+    return np.array([misc.imread(im) for im in images])
 
 
 class ImagePreProcessor:
@@ -81,14 +81,30 @@ class ImagePreProcessor:
         im_yuv[:,:,0] = cv2.equalizeHist(im[:,:,0])
         return cv2.cvtColor(im_yuv, cv2.COLOR_YUV2RGB)
 
-    def preprocess_img(self, im, size=(512, 512), threshold=50, norm=False):
+    def norm(self, im, method='basic', mean=45, mean_r=85, mean_g=60, mean_b=43):
+        im =  cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        if method == 'basic':
+            im -= mean
+        elif method == 'channel':
+            im[:,:,0] -= mean_r
+            im[:,:,1] -= mean_g
+            im[:,:,2] -= mean_b
+        return im
+
+    def preprocess_img(self, im, size=(512, 512), threshold=50, hist_equalize=False, norm=None):
         im = cv2.imread(im)
         im = self.smart_crop(im, threshold)
         im = self.smart_resize(im, size)
-        if norm == True:
-            return self.histogram_equalization(im)
+        if hist_equalize == True:
+            im = self.histogram_equalization(im)
+
+        if norm == 'basic':
+            return self.norm(im, method='basic')
+        elif norm == 'channel':
+            return self.norm(im, method='channel')
         else:
-            return cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+            return im
+
 
     def preprocess_directory(self, input_dir, output_dir, size=(512, 512), threshold=50, norm=False):
         """process all images in input dir and save to output_dir"""

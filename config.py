@@ -2,8 +2,8 @@ import os
 from keras.optimizers import Adam, Nadam, SGD
 
 preprocessing_config = {
-            'process_train': False,
-            'process_test': False,
+            'process_train': True,
+            'process_test': True,
             'arrange_directories': False,
             'y_path': os.path.join('data', 'trainLabels.csv'),
             'size': (512, 512),
@@ -16,11 +16,11 @@ preprocessing_config = {
 }
 
 training_config = {
-            'model_name': 'resnetv1_Nadam',
+            'model_name': 'resnetv1_Nadam_norm',
             'prototype_model': False,
             'continue_training': False,
             'lower_lr': False,
-            'optimizer': Nadam(lr=0.0001), #eg Adam(lr=0.001), Nadam(), SGD(lr=0.001)
+            'optimizer': Nadam(lr=0.0001), #eg Adam(lr=0.0001), Nadam(0.0001), SGD(lr=0.001)
             'loss': 'categorical_crossentropy',
             'batch_size': 3,
             'nb_epoch': 5,
