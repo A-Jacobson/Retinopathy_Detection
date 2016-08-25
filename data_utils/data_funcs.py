@@ -14,7 +14,7 @@ def find_class(df, label):
     return df[df.level == label].image.values
 
 def move_file(name, split, label, src=os.path.join("E:", "DR_Data"), dst=os.path.join("E:", "DR_Data"), ending='.jpeg'):
-    shutil.move(os.path.join(src, 'train_512', name+ending), os.path.join(dst, split, str(label), name+ending))
+    shutil.move(os.path.join(src, 'train_256', name+ending), os.path.join(dst, split, str(label), name+ending))
 
 def arrange_directories(df, split, labels=[0, 1, 2, 3, 4], src=os.path.join("E:", "DR_Data"), dst=os.path.join("E:", "DR_Data"), ending='.jpeg'):
     for label in labels:

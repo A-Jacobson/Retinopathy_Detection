@@ -8,7 +8,6 @@ from scipy import misc
 import itertools
 
 
-
 def get_channel_means(images):
     sum_r = 0
     sum_g = 0
@@ -23,7 +22,6 @@ def get_channel_means(images):
     mean_g = sum_g / n
     mean_b = sum_b / n
     return np.array([mean_r, mean_g, mean_b], dtype='uint8')
-
 
 def get_mean(images):
     total = 0
@@ -81,7 +79,7 @@ class ImagePreProcessor:
         im_yuv[:,:,0] = cv2.equalizeHist(im[:,:,0])
         return cv2.cvtColor(im_yuv, cv2.COLOR_YUV2RGB)
 
-    def norm(self, im, method='basic', mean=45, mean_r=85, mean_g=60, mean_b=43):
+    def norm(self, im, method='basic', mean=59, mean_r=81, mean_g=57, mean_b=41, mean_image=None):
         im =  cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         if method == 'basic':
             im -= mean
@@ -89,6 +87,8 @@ class ImagePreProcessor:
             im[:,:,0] -= mean_r
             im[:,:,1] -= mean_g
             im[:,:,2] -= mean_b
+        elif method == 'image':
+            im -= mean_image
         return im
 
     def preprocess_img(self, im, size=(512, 512), threshold=50, hist_equalize=False, norm=None):
@@ -97,14 +97,12 @@ class ImagePreProcessor:
         im = self.smart_resize(im, size)
         if hist_equalize == True:
             im = self.histogram_equalization(im)
-
         if norm == 'basic':
             return self.norm(im, method='basic')
         elif norm == 'channel':
             return self.norm(im, method='channel')
         else:
             return im
-
 
     def preprocess_directory(self, input_dir, output_dir, size=(512, 512), threshold=50, norm=False):
         """process all images in input dir and save to output_dir"""
