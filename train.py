@@ -15,7 +15,13 @@ import matplotlib.pyplot as plt
 size = preprocessing_config['size']
 config = training_config
 
-nb_train_samples = 21181
+if config['loss'] == 'mean_squared_error':
+    class_mode = 'sparse'
+
+else:
+    class_mode = 'categorical'
+
+nb_train_samples = 22481
 nb_validation_samples = 5620
 
 earlystop = EarlyStopping(monitor='val_loss', patience=2, verbose=1, mode='auto')
@@ -32,7 +38,7 @@ if config['continue_training'] == True:
     model = load_model(os.path.join('models', 'saved_models', config['model_name']+'.hdf5'))
     if config['lower_lr'] == True:
         current_lr =  model.optimizer.lr.get_value()
-        new_lr = current_lr / 2.
+        new_lr = current_lr / 3.
         print "current_lr: ", current_lr
         print "new_lr:", current_lr / 2.
         model.optimizer.lr.set_value(new_lr)
@@ -60,10 +66,8 @@ else:
 
     train_datagen = ImageDataGenerator(
                 samplewise_center=True,
-                zoom_range=0.1,
                 horizontal_flip=True,
-                vertical_flip=True,
-                rotation_range=10,
+                rotation_range=360,
                 rescale=1/255.
                 )
 
@@ -76,13 +80,13 @@ else:
             config['train_data_dir'],
             target_size=preprocessing_config['size'],
             batch_size=config['batch_size'],
-            class_mode='categorical')
+            class_mode=class_mode)
 
     validation_generator = test_datagen.flow_from_directory(
             config['validation_data_dir'],
             target_size=preprocessing_config['size'],
             batch_size=config['batch_size'],
-            class_mode='categorical')
+            class_mode=class_mode)
 
     history = model.fit_generator(
             train_generator,

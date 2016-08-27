@@ -46,6 +46,7 @@ class ImagePreProcessor:
         """
         imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(imgray, threshold, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        # thresh = cv2.adaptiveThreshold(imgray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
         contours = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         x, y, w, h = cv2.boundingRect(contours[0])
         return im[y:y+h,x:x+w]
@@ -79,7 +80,7 @@ class ImagePreProcessor:
         im_yuv[:,:,0] = cv2.equalizeHist(im[:,:,0])
         return cv2.cvtColor(im_yuv, cv2.COLOR_YUV2RGB)
 
-    def norm(self, im, method='basic', mean=59, mean_r=81, mean_g=57, mean_b=41, mean_image=None):
+    def norm(self, im, method='channel', mean=59, mean_r=81, mean_g=57, mean_b=41, mean_image=None):
         im =  cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         if method == 'basic':
             im -= mean
@@ -102,7 +103,7 @@ class ImagePreProcessor:
         elif norm == 'channel':
             return self.norm(im, method='channel')
         else:
-            return im
+            return cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 
     def preprocess_directory(self, input_dir, output_dir, size=(512, 512), threshold=50, norm=False):
         """process all images in input dir and save to output_dir"""
@@ -110,5 +111,5 @@ class ImagePreProcessor:
         for f in files:
             inpath = os.path.join(input_dir, f)
             outpath = os.path.join(output_dir, f)
-            im = self.preprocess_img(inpath, norm=norm)
+            im = self.preprocess_img(inpath, norm=norm, size=size, threshold=threshold)
             misc.imsave(outpath, im)

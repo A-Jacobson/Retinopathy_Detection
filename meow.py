@@ -1,21 +1,20 @@
-from data_utils.data_funcs import get_labels
-# from keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
 import os
-import pandas as pd
+from config import training_config
 
 
-# idx_label =  get_labels(os.path.abspath(os.path.join('E:', 'DR_Data', 'test')))
-#
-# test_datagen = ImageGenerator()
+
+
+# test_datagen = ImageDataGenerator(samplewise_center=False)
 #
 # test_generator = test_datagen.flow_from_directory(
-#         config['test_data_dir'],
-#         target_size=(512, 512),
+#         training_config['test_data_dir'],
+#         target_size=(256, 256),
 #         batch_size=5,
 #         class_mode=None,
-#         shuffle=False)
+#         shuffle=False,
+#         save_to_dir=os.path.join('samples'))
 #
-# print test_generator
+# print test_generator.filenames
 
-loss = pd.read_csv(os.path.join('training_history', 'resnetv1_2.csv'))
-print loss
+print os.listdir(os.path.join(training_config['test_data_dir'], 'unknown'))

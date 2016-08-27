@@ -44,7 +44,7 @@ def resnet_v1(input_shape=(3, 512, 512), nb_classes=5, optimizer=Adam(), loss='c
     if loss == 'categorical_crossentropy':
         out = Dense(nb_classes, init='he_normal', activation='softmax', name='fc10')(out)
     elif loss == 'mean_squared_error':
-        out = Dense(nb_classes, init='he_normal', activation='linear', name='fc10')(out)
+        out = Dense(1, init='he_normal', activation='linear', name='fc1')(out)
 
     model = Model(inp, out)
 

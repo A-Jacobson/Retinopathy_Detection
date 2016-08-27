@@ -9,11 +9,11 @@ pre = ImagePreProcessor()
 
 # resize preprocess train
 if config['process_train'] == True:
-    pre.preprocess_directory(config['input_dir_train'], config['output_dir_train'], size=config['size'], norm=False)
+    pre.preprocess_directory(config['input_dir_train'], config['output_dir_train'], size=config['size'], norm=config['center'])
 
 # preprocess test
 if config['process_test'] == True:
-    pre.preprocess_directory(config['input_dir_test'], config['output_dir_test'], size=config['size'], norm=False)
+    pre.preprocess_directory(config['input_dir_test'], config['output_dir_test'], size=config['size'], norm=config['center'])
 
 #split training directories for keras flow from directory
 if config['arrange_directories'] == True:

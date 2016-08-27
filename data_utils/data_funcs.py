@@ -5,8 +5,7 @@ import fnmatch
 
 def train_test_val_split(y, split=0.8, random_state=1337):
     y_new = y.sample(frac=split,random_state=random_state)
-    test = y.drop(y_new.index)
-    train= y_new.sample(frac=split,random_state=random_state)
+    test = y.drop(y_new.index),mm,m,tyhjyhyhjj
     val = y_new.drop(train.index)
     return train, test, val
 
@@ -23,4 +22,23 @@ def arrange_directories(df, split, labels=[0, 1, 2, 3, 4], src=os.path.join("E:"
             move_file(name, split, label, src, dst, ending)
 
 def get_labels(directory):
-    return {i: image.strip('.jpeg') for i, image in enumerate(os.listdir(directory))}
+    return [image.strip('.jpeg') for image in os.listdir(directory)]
+
+
+def fix_preds(x):
+    if x <= 0:
+        return 0.0
+    elif x >= 4:
+        return 4.0
+    else:
+        return x
+
+def write_answer(preds, directory):
+    images = get_labels(directory)
+    preds['image'] = images
+    preds['level'] = preds['0']
+    preds['level'] = preds['0'].apply(lambda x: np.round(x, 0))
+    preds['level'] = preds['level'].apply(fix_preds)
+    preds = preds.fillna(0)
+    preds['level'] = preds['level'].astype(int)
+    preds.to_csv('answers.csv', columns=['image', 'level'], index=False)
