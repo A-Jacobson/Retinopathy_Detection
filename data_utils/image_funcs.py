@@ -8,7 +8,6 @@ from scipy import misc
 import itertools
 
 
-
 def get_channel_means(images):
     sum_r = 0
     sum_g = 0
@@ -23,7 +22,6 @@ def get_channel_means(images):
     mean_g = sum_g / n
     mean_b = sum_b / n
     return np.array([mean_r, mean_g, mean_b], dtype='uint8')
-
 
 def get_mean(images):
     total = 0
@@ -48,6 +46,7 @@ class ImagePreProcessor:
         """
         imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(imgray, threshold, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        # thresh = cv2.adaptiveThreshold(imgray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
         contours = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         x, y, w, h = cv2.boundingRect(contours[0])
         return im[y:y+h,x:x+w]
@@ -81,7 +80,7 @@ class ImagePreProcessor:
         im_yuv[:,:,0] = cv2.equalizeHist(im[:,:,0])
         return cv2.cvtColor(im_yuv, cv2.COLOR_YUV2RGB)
 
-    def norm(self, im, method='basic', mean=45, mean_r=85, mean_g=60, mean_b=43):
+    def norm(self, im, method='channel', mean=59, mean_r=81, mean_g=57, mean_b=41, mean_image=None):
         im =  cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         if method == 'basic':
             im -= mean
@@ -89,6 +88,8 @@ class ImagePreProcessor:
             im[:,:,0] -= mean_r
             im[:,:,1] -= mean_g
             im[:,:,2] -= mean_b
+        elif method == 'image':
+            im -= mean_image
         return im
 
     def preprocess_img(self, im, size=(512, 512), threshold=50, hist_equalize=False, norm=None):
@@ -97,14 +98,12 @@ class ImagePreProcessor:
         im = self.smart_resize(im, size)
         if hist_equalize == True:
             im = self.histogram_equalization(im)
-
         if norm == 'basic':
             return self.norm(im, method='basic')
         elif norm == 'channel':
             return self.norm(im, method='channel')
         else:
-            return im
-
+            return cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 
     def preprocess_directory(self, input_dir, output_dir, size=(512, 512), threshold=50, norm=False):
         """process all images in input dir and save to output_dir"""
@@ -112,5 +111,5 @@ class ImagePreProcessor:
         for f in files:
             inpath = os.path.join(input_dir, f)
             outpath = os.path.join(output_dir, f)
-            im = self.preprocess_img(inpath, norm=norm)
+            im = self.preprocess_img(inpath, norm=norm, size=size, threshold=threshold)
             misc.imsave(outpath, im)

@@ -7,13 +7,19 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Dense, Activation, Flatten, BatchNormalization, Dropout
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from models.vgg_nets import conv1, conv0
-from models.resnets import resnet_v1
+from models.resnets import resnet_v1, resnet_v2
 from config import training_config, preprocessing_config
 from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
 size = preprocessing_config['size']
 config = training_config
+
+if config['loss'] == 'mean_squared_error':
+    class_mode = 'sparse'
+
+else:
+    class_mode = 'categorical'
 
 nb_train_samples = 22481
 nb_validation_samples = 5620
@@ -27,19 +33,18 @@ checkpointer = ModelCheckpoint(
             save_best_only=False,
             monitor='val_loss')
 
-#load model
+
 if config['continue_training'] == True:
     model = load_model(os.path.join('models', 'saved_models', config['model_name']+'.hdf5'))
     if config['lower_lr'] == True:
         current_lr =  model.optimizer.lr.get_value()
-        new_lr = current_lr / 10.
+        new_lr = current_lr / 3.
         print "current_lr: ", current_lr
-        print "new_lr:", current_lr / 10.
+        print "new_lr:", current_lr / 2.
         model.optimizer.lr.set_value(new_lr)
 
 else:
-    model = resnet_v1(optimizer=config['optimizer'], loss=config['loss'])
-
+    model = resnet_v1(optimizer=config['optimizer'], loss=config['loss'], input_shape=(3, 256, 256))
 
 if config['prototype_model'] == True:
     # checks if model overfits one sample
@@ -55,15 +60,12 @@ if config['prototype_model'] == True:
             callbacks=[checkpointer],
             class_weight=config['class_weight'])
 else:
-
     gen_sample_X = np.load(os.path.join('data', 'gen_sample_X.npy'))
 
     train_datagen = ImageDataGenerator(
                 samplewise_center=True,
-                zoom_range=0.1,
                 horizontal_flip=True,
-                vertical_flip=True,
-                rotation_range=10,
+                rotation_range=360,
                 rescale=1/255.
                 )
 
@@ -76,13 +78,13 @@ else:
             config['train_data_dir'],
             target_size=preprocessing_config['size'],
             batch_size=config['batch_size'],
-            class_mode='categorical')
+            class_mode=class_mode)
 
     validation_generator = test_datagen.flow_from_directory(
             config['validation_data_dir'],
             target_size=preprocessing_config['size'],
             batch_size=config['batch_size'],
-            class_mode='categorical')
+            class_mode=class_mode)
 
     history = model.fit_generator(
             train_generator,
@@ -93,28 +95,9 @@ else:
             callbacks=[checkpointer, earlystop],
             nb_worker=4)
 
-# list all data in history
-
 if config['continue_training'] == True:
     with open(os.path.join('training_history', config['model_name']+'.csv'), 'a') as f:
         pd.DataFrame(history.history).to_csv(f, header=False)
 
 else:
     pd.DataFrame(history.history).to_csv(os.path.join('training_history', config['model_name']+'.csv'))
-
-# summarize history for accuracy
-plt.plot(history.history['acc'])
-# plt.plot(history.history['val_acc'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show()
-
-plt.plot(history.history['loss'])
-# plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show()
