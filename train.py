@@ -33,7 +33,7 @@ checkpointer = ModelCheckpoint(
             save_best_only=False,
             monitor='val_loss')
 
-#load model
+
 if config['continue_training'] == True:
     model = load_model(os.path.join('models', 'saved_models', config['model_name']+'.hdf5'))
     if config['lower_lr'] == True:
@@ -45,7 +45,6 @@ if config['continue_training'] == True:
 
 else:
     model = resnet_v1(optimizer=config['optimizer'], loss=config['loss'], input_shape=(3, 256, 256))
-
 
 if config['prototype_model'] == True:
     # checks if model overfits one sample
@@ -61,7 +60,6 @@ if config['prototype_model'] == True:
             callbacks=[checkpointer],
             class_weight=config['class_weight'])
 else:
-
     gen_sample_X = np.load(os.path.join('data', 'gen_sample_X.npy'))
 
     train_datagen = ImageDataGenerator(
@@ -97,28 +95,9 @@ else:
             callbacks=[checkpointer, earlystop],
             nb_worker=4)
 
-# list all data in history
-
 if config['continue_training'] == True:
     with open(os.path.join('training_history', config['model_name']+'.csv'), 'a') as f:
         pd.DataFrame(history.history).to_csv(f, header=False)
 
 else:
     pd.DataFrame(history.history).to_csv(os.path.join('training_history', config['model_name']+'.csv'))
-
-# summarize history for accuracy
-# plt.plot(history.history['acc'])
-# # plt.plot(history.history['val_acc'])
-# plt.title('model accuracy')
-# plt.ylabel('accuracy')
-# plt.xlabel('epoch')
-# plt.legend(['train', 'test'], loc='upper left')
-# plt.show()
-#
-# plt.plot(history.history['loss'])
-# # plt.plot(history.history['val_loss'])
-# plt.title('model loss')
-# plt.ylabel('loss')
-# plt.xlabel('epoch')
-# plt.legend(['train', 'test'], loc='upper left')
-# plt.show()
