@@ -24,7 +24,6 @@ def arrange_directories(df, split, labels=[0, 1, 2, 3, 4], src=os.path.join("E:"
 def get_labels(directory):
     return [image.strip('.jpeg') for image in os.listdir(directory)]
 
-
 def fix_preds(x):
     if x <= 0:
         return 0.0
